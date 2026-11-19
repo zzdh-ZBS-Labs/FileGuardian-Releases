@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>FileGuardian.Plugin.Sdk</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileGuardian.Protocol\FileGuardian.Protocol.csproj" />
+  </ItemGroup>
+</Project>

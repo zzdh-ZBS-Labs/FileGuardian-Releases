@@ -1,0 +1,5 @@
+{
+  "id": "zbs.entropy",
+  "name": "Entropy & file-type triage",
+  "executable": "FileGuardian.Plugins.Entropy"
+}

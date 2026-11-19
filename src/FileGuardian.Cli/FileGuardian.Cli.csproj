@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FileGuardian.Cli</AssemblyName>
+    <RootNamespace>FileGuardian.Cli</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileGuardian.Core\FileGuardian.Core.csproj" />
+  </ItemGroup>
+</Project>

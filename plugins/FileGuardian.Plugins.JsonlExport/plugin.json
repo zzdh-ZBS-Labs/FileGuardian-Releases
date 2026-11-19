@@ -1,0 +1,5 @@
+{
+  "id": "zbs.jsonl-export",
+  "name": "JSON-lines event export",
+  "executable": "FileGuardian.Plugins.JsonlExport"
+}

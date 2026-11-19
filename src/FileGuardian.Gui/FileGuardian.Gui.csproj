@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!--
+      Console subsystem on purpose: the same exe is also the CLI and the
+      plugin host. In GUI mode the console window is released at startup
+      (see Program.HideOwnedConsole).
+    -->
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FileGuardian</AssemblyName>
+    <RootNamespace>FileGuardian.Gui</RootNamespace>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>Best-effort live-file capture with out-of-process plugins</Description>
+  </PropertyGroup>
+
+  <!-- All-in-one single-file publish: dotnet publish -c Release -r win-x64 -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FileGuardian.Core\FileGuardian.Core.csproj" />
+    <ProjectReference Include="..\FileGuardian.Plugin.Sdk\FileGuardian.Plugin.Sdk.csproj" />
+  </ItemGroup>
+
+  <!-- Compiled in from the standalone projects so there is one source of truth. -->
+  <ItemGroup>
+    <Compile Include="..\FileGuardian.Cli\CliApp.cs" Link="AllInOne\CliApp.cs" />
+    <Compile Include="..\..\plugins\FileGuardian.Plugins.Entropy\EntropyPlugin.cs" Link="AllInOne\EntropyPlugin.cs" />
+    <Compile Include="..\..\plugins\FileGuardian.Plugins.ExtensionFilter\ExtensionFilterPlugin.cs" Link="AllInOne\ExtensionFilterPlugin.cs" />
+    <Compile Include="..\..\plugins\FileGuardian.Plugins.JsonlExport\JsonlExportPlugin.cs" Link="AllInOne\JsonlExportPlugin.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+</Project>

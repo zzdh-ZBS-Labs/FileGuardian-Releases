@@ -1,0 +1,5 @@
+{
+  "id": "zbs.extension-filter",
+  "name": "Extension & path filter",
+  "executable": "FileGuardian.Plugins.ExtensionFilter"
+}

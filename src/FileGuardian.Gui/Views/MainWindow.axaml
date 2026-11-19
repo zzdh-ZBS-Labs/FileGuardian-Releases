@@ -1,0 +1,282 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FileGuardian.Gui.ViewModels"
+        xmlns:views="using:FileGuardian.Gui.Views"
+        x:Class="FileGuardian.Gui.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="FileGuardian - ZBS Labs"
+        Icon="/Assets/icon.ico"
+        Width="1240" Height="800" MinWidth="980" MinHeight="600">
+
+  <Window.Styles>
+    <Style Selector="Border.badge">
+      <Setter Property="Background" Value="#ECEEF1" />
+      <Setter Property="BorderBrush" Value="#C9CED6" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.badge TextBlock"><Setter Property="Foreground" Value="#3D4450" /></Style>
+    <Style Selector="Border.badge Ellipse"><Setter Property="Fill" Value="#8A919C" /></Style>
+
+    <Style Selector="Border.badge.armed"><Setter Property="Background" Value="#E6F4EC" /><Setter Property="BorderBrush" Value="#9BCFB0" /></Style>
+    <Style Selector="Border.badge.armed TextBlock"><Setter Property="Foreground" Value="#14532D" /></Style>
+    <Style Selector="Border.badge.armed Ellipse"><Setter Property="Fill" Value="#1B8A4A" /></Style>
+
+    <Style Selector="Border.badge.preparing, Border.badge.stopping"><Setter Property="Background" Value="#FFF4DE" /><Setter Property="BorderBrush" Value="#E7C27A" /></Style>
+    <Style Selector="Border.badge.preparing TextBlock, Border.badge.stopping TextBlock"><Setter Property="Foreground" Value="#6B4200" /></Style>
+    <Style Selector="Border.badge.preparing Ellipse, Border.badge.stopping Ellipse"><Setter Property="Fill" Value="#C77C00" /></Style>
+  </Window.Styles>
+
+  <DockPanel>
+
+    <!-- Brand header -->
+    <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource BrandNavyBrush}" BorderThickness="0,0,0,3">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="22,12">
+        <Image Source="/Assets/zbslabs-logo.png" Height="48" VerticalAlignment="Center"
+               RenderOptions.BitmapInterpolationMode="HighQuality"
+               ToolTip.Tip="ZBS Labs" />
+        <Border Grid.Column="1" Width="1" Background="{StaticResource BorderBrushSoft}" Margin="20,4" />
+        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+          <TextBlock Text="FileGuardian" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource BrandNavyBrush}" />
+          <TextBlock Text="Malware artifact capture" Classes="hint" />
+        </StackPanel>
+        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+          <Border Classes="badge"
+                  Classes.armed="{Binding IsArmed}" Classes.preparing="{Binding IsPreparing}" Classes.stopping="{Binding IsStopping}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <Ellipse Width="8" Height="8" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding SessionState}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+          <TextBlock Text="{Binding AppVersion}" Classes="hint" VerticalAlignment="Center" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Status bar -->
+    <Border DockPanel.Dock="Bottom" Background="{StaticResource BrandNavyBrush}" Padding="22,6">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding StatusText}" Foreground="White" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Foreground="#C9CDD2" VerticalAlignment="Center" Margin="16,0,0,0"
+                   Text="{Binding Captures.Count, StringFormat='{}{0} captures loaded   |   ZBS Labs'}" />
+      </Grid>
+    </Border>
+
+    <Grid ColumnDefinitions="340,*" ColumnSpacing="16" Margin="16">
+
+      <!-- Session configuration -->
+      <Border Classes="card">
+        <ScrollViewer>
+          <StackPanel Spacing="16">
+            <TextBlock Text="CAPTURE SESSION" Classes="section" />
+
+            <StackPanel>
+              <TextBlock Text="Monitor folder" Classes="label" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                <TextBox Text="{Binding MonitorDirectory}" IsEnabled="{Binding IsIdle}" PlaceholderText="Folder to watch" />
+                <Button Grid.Column="1" Content="Browse" Click="OnBrowseMonitor" IsEnabled="{Binding IsIdle}" />
+              </Grid>
+            </StackPanel>
+
+            <StackPanel>
+              <TextBlock Text="Capture folder" Classes="label" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                <TextBox Text="{Binding BackupDirectory}" IsEnabled="{Binding IsIdle}" PlaceholderText="Evidence destination" />
+                <Button Grid.Column="1" Content="Browse" Click="OnBrowseBackup" IsEnabled="{Binding IsIdle}" />
+              </Grid>
+              <TextBlock Classes="hint" Margin="0,4,0,0"
+                         Text="Must not overlap the monitor folder. Keep it on the same volume so files can be pinned before deletion." />
+            </StackPanel>
+
+            <Border Height="1" Background="{StaticResource BorderBrushSoft}" />
+            <TextBlock Text="OPTIONS" Classes="section" />
+
+            <StackPanel Spacing="2">
+              <CheckBox Content="Also collect existing files" IsChecked="{Binding CaptureExistingFiles}" IsEnabled="{Binding IsIdle}" />
+              <TextBlock Classes="hint" Margin="28,0,0,0" Text="Off by default. Only new or modified artifacts are captured." />
+            </StackPanel>
+            <StackPanel Spacing="2">
+              <CheckBox Content="Block deletion while capturing" IsChecked="{Binding HoldDelete}" IsEnabled="{Binding IsIdle}" />
+              <TextBlock Classes="hint" Margin="28,0,0,0" Text="Windows only. The sample can notice the failed delete." />
+            </StackPanel>
+
+            <Border Height="1" Background="{StaticResource BorderBrushSoft}" />
+
+            <Button Content="Arm artifact capture" Command="{Binding StartCommand}" Classes="primary"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" />
+            <Button Content="Stop" Command="{Binding StopCommand}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,10" />
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+
+      <!-- Workspace -->
+      <Border Grid.Column="1" Classes="card" Padding="12,6,12,12">
+    <TabControl>
+
+      <!-- Activity -->
+      <TabItem Header="Activity">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,4,0,8">
+            <CheckBox Content="Show debug messages" IsChecked="{Binding ShowDebug}" />
+            <Button Content="Clear" Command="{Binding ClearLogCommand}" />
+          </StackPanel>
+          <Border Background="#F8F9FA" BorderBrush="{StaticResource BorderBrushSoft}" BorderThickness="1" CornerRadius="4">
+            <ListBox Classes="log" ItemsSource="{Binding LogLines}" FontFamily="{StaticResource MonoFont}" FontSize="12">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:LogLine">
+                  <SelectableTextBlock Text="{Binding Text}" Foreground="{Binding Brush}" TextWrapping="Wrap" />
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+        </DockPanel>
+      </TabItem>
+
+      <!-- Captures -->
+      <TabItem Header="Captures">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+            <Button Content="Refresh" Command="{Binding RefreshCapturesCommand}" />
+            <Button Content="Re-run analysis on selected" Command="{Binding AnalyzeSelectedCommand}" />
+            <Button Content="{Binding LegacyText}" Command="{Binding MigrateLegacyCommand}" IsVisible="{Binding HasLegacy}" />
+          </StackPanel>
+
+          <Border Grid.Row="1" Background="#F2F3F5" CornerRadius="4" Padding="10,6">
+            <Grid ColumnDefinitions="160,*,70,90,110" ColumnSpacing="10">
+              <TextBlock Text="CAPTURED" Classes="colhead" />
+              <TextBlock Grid.Column="1" Text="PATH" Classes="colhead" />
+              <TextBlock Grid.Column="2" Text="VERSION" Classes="colhead" />
+              <TextBlock Grid.Column="3" Text="SIZE" Classes="colhead" HorizontalAlignment="Right" />
+              <TextBlock Grid.Column="4" Text="VERDICT" Classes="colhead" />
+            </Grid>
+          </Border>
+
+          <ListBox Grid.Row="2" Classes="rows" ItemsSource="{Binding Captures}" SelectedItem="{Binding SelectedCapture}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:CaptureItemViewModel">
+                <Grid ColumnDefinitions="160,*,70,90,110" ColumnSpacing="10">
+                  <TextBlock Text="{Binding Time}" FontFamily="{StaticResource MonoFont}" FontSize="12" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{Binding DisplayPath}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding VersionLabel}" Classes="hint" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="3" Text="{Binding Size}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="4" Text="{Binding Verdict}" FontWeight="SemiBold" VerticalAlignment="Center"
+                             Classes="verdict" Classes.suspicious="{Binding IsSuspicious}" Classes.malicious="{Binding IsMalicious}"
+                             Classes.info="{Binding IsInfo}" Classes.clean="{Binding IsClean}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <Border Grid.Row="3" Padding="14" CornerRadius="4" BorderThickness="3,1,1,1"
+                  BorderBrush="{StaticResource BrandNavyBrush}" Background="#FAFBFC"
+                  IsVisible="{Binding SelectedCapture, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <StackPanel DataContext="{Binding SelectedCapture}" x:DataType="vm:CaptureItemViewModel" Spacing="4">
+              <SelectableTextBlock Text="{Binding OriginalPath}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap" />
+              <SelectableTextBlock Text="{Binding Sha256, StringFormat='SHA-256  {0}'}" FontFamily="{StaticResource MonoFont}" FontSize="12" />
+              <SelectableTextBlock Text="{Binding LatestCopyText}" TextWrapping="Wrap" />
+              <SelectableTextBlock Text="{Binding StoredAt, StringFormat='This version: {0}'}" TextWrapping="Wrap" />
+              <SelectableTextBlock Text="{Binding CaptureId, StringFormat='Capture ID: {0}'}" Classes="hint" />
+              <SelectableTextBlock Text="{Binding SessionText}" Classes="hint" />
+              <TextBlock Text="{Binding Completeness}" />
+              <SelectableTextBlock Text="{Binding AnalysisText}" TextWrapping="Wrap" Margin="0,6,0,0" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <!-- Plugins -->
+      <TabItem Header="Plugins">
+        <Grid ColumnDefinitions="300,*" ColumnSpacing="12">
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Spacing="6" Margin="0,0,0,6">
+              <Button Content="Reload plugin folder" Command="{Binding ReloadPluginsCommand}" />
+              <SelectableTextBlock Text="{Binding PluginsDirectory}" TextWrapping="Wrap" FontSize="11" Opacity="0.8" />
+            </StackPanel>
+            <ListBox Classes="rows" ItemsSource="{Binding Plugins}" SelectedItem="{Binding SelectedPlugin}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:PluginItemViewModel">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding StateText}" Classes="hint" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+
+          <ScrollViewer Grid.Column="1">
+            <StackPanel DataContext="{Binding SelectedPlugin}" x:DataType="vm:PluginItemViewModel" Spacing="6"
+                        IsVisible="{Binding $self.DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource BrandNavyBrush}" />
+              <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+              <SelectableTextBlock Text="{Binding Id, StringFormat='Id: {0}'}" />
+              <TextBlock Text="{Binding Origin}" />
+              <TextBlock Text="{Binding Version, StringFormat='Version: {0}'}" />
+              <TextBlock Text="{Binding Capabilities, StringFormat='Hooks: {0}'}" />
+              <TextBlock Text="{Binding StateText, StringFormat='State: {0}'}" FontWeight="SemiBold" />
+              <SelectableTextBlock Text="{Binding LastError}" Foreground="#B42318" TextWrapping="Wrap" />
+              <SelectableTextBlock Text="{Binding Executable, StringFormat='Executable: {0}'}" TextWrapping="Wrap" FontSize="12" />
+              <SelectableTextBlock Text="{Binding Digest}" TextWrapping="Wrap" FontSize="12"
+                                   FontFamily="{StaticResource MonoFont}" />
+
+              <WrapPanel Margin="0,6,0,0">
+                <Button Content="Approve…" Command="{Binding ApproveCommand}" IsVisible="{Binding IsUntrusted}" Classes="primary" Margin="0,0,8,8" />
+                <Button Content="Enable" Command="{Binding EnableCommand}" IsVisible="{Binding CanEnable}" Margin="0,0,8,8" />
+                <Button Content="Disable" Command="{Binding DisableCommand}" IsVisible="{Binding IsRunning}" Margin="0,0,8,8" />
+                <Button Content="Restart" Command="{Binding RestartCommand}" Margin="0,0,8,8" />
+                <Button Content="Revoke approval" Command="{Binding RevokeCommand}" IsVisible="{Binding CanRevoke}" Margin="0,0,8,8" />
+              </WrapPanel>
+              <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+
+              <StackPanel IsVisible="{Binding HasSettings}" Spacing="8" Margin="0,10,0,0">
+                <TextBlock Text="SETTINGS" Classes="section" />
+                <ItemsControl ItemsSource="{Binding Settings}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SettingFieldViewModel">
+                      <StackPanel Spacing="2" Margin="0,0,0,10">
+                        <TextBlock Text="{Binding Label}" IsVisible="{Binding IsText}" />
+                        <TextBox Text="{Binding Value}" IsVisible="{Binding IsText}" />
+                        <CheckBox Content="{Binding Label}" IsChecked="{Binding BoolValue}" IsVisible="{Binding IsBool}" />
+                        <TextBlock Text="{Binding Description}" IsVisible="{Binding HasDescription}" FontSize="12" Opacity="0.75" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Content="Save settings" Command="{Binding SaveSettingsCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+      </TabItem>
+
+      <!-- Plugin-provided panels -->
+      <TabItem Header="Plugin panels">
+        <Grid>
+          <TextBlock Text="No running plugins provide a panel." Classes="hint" Margin="4"
+                     IsVisible="{Binding !PanelTabs.Count}" />
+          <TabControl ItemsSource="{Binding PanelTabs}" SelectedItem="{Binding SelectedPanel}">
+            <TabControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PanelTabViewModel">
+                <TextBlock Text="{Binding Title}" />
+              </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+              <DataTemplate x:DataType="vm:PanelTabViewModel">
+                <DockPanel>
+                  <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+                    <TextBlock Text="{Binding Error}" Foreground="#B42318" VerticalAlignment="Center" />
+                  </StackPanel>
+                  <views:PanelHost Model="{Binding Panel}" ActionCommand="{Binding InvokeActionCommand}" />
+                </DockPanel>
+              </DataTemplate>
+            </TabControl.ContentTemplate>
+                </TabControl>
+        </Grid>
+      </TabItem>
+    </TabControl>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>
